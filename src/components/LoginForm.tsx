@@ -1,88 +1,59 @@
-import React, { FC, useState, ChangeEvent, FormEvent } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { login } from '../services/authService';
+import { setToken } from '../utils/tokenUtils';
+import { useNavigate } from 'react-router-dom';
 
+const Login: React.FC = () => {
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
+  const [error, setError] = useState<string | null>(null);
+  const navigate = useNavigate(); 
 
-
-
-interface FormData {
-  email: string;
-  password: string;
-}
-
-const SignIn: FC = () => {
-  const API_URL = 'https://skill-test.similater.website/api/v1';
-
-  const [formData, setFormData] = useState<FormData>({ email: '', password: '' });
-  const { loading, error } = useSelector((state: { user: { loading: boolean; error: string } }) => state.user);
-  const navigate = useNavigate();
-
-
-
-  const handleChange = (e: ChangeEvent<HTMLInputElement>): void => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: FormEvent<HTMLFormElement>): Promise<void> => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      
-      const res = await fetch(`${API_URL}/user/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      });
-      const data = await res.json();
-      console.log(data);
-      if (data.success === false) {
-       console.error((data.message));
-        return;
-      }
-      
+      const data = await login(email, password);
+      setToken(data.accessToken); // Store token
       navigate('/home');
-    } catch (error) {
-     
+      alert('Login successful');
+    } catch (err) {
+      setError('Login failed. Please try again.');
     }
   };
 
   return (
-    <div className='p-3 max-w-lg mx-auto'>
-      <h1 className='text-3xl text-center font-semibold my-7'>Sign In</h1>
-      <form onSubmit={handleSubmit} className='flex flex-col gap-4'>
+    <div className='min-h-screen '>
+      <div className='bg-white mt-20 shadow-md max-w-2xl justify-center mx-auto p-16 rounded-lg '>
+        <h1 className='text-black flex justify-center '>Logging</h1>
+    <form onSubmit={handleLogin}>
+      <div className='flex  gap-8 my-5'>
+        <label htmlFor="email">Email:</label>
         <input
-          type='email'
-          placeholder='email'
-          className='border p-3 rounded-lg'
-          id='email'
-          onChange={handleChange}
+          type="email"
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          className='border-2 border-slate-800 w-32  h-5  rounded-lg'
         />
+      </div>
+      <div className='flex  gap-8 my-5'>
+        <label htmlFor="password">Password:</label>
         <input
-          type='password'
-          placeholder='password'
-          className='border p-3 rounded-lg'
-          id='password'
-          onChange={handleChange}
+          type="password"
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+           className='border-2 border-slate-800 w-32  h-5  rounded-lg'
         />
-        <button
-          disabled={loading}
-          className='bg-slate-700 text-white p-3 rounded-lg uppercase hover:opacity-95 disabled:opacity-80'
-        >
-          {loading ? 'Loading...' : 'Sign In'}
-        </button>
-        
-      </form>
-      
-     
+      </div>
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+      <button className='bg-slate-800 text-white rounded-lg px-4 py-2' type="submit ">Login</button>
+    </form>
+    </div>
     </div>
   );
-}
+};
 
-export default SignIn;
-
-function useSelector(arg0: (state: { user: { loading: boolean; error: string; }; }) => { loading: boolean; error: string; }): { loading: any; error: any; } {
-  throw new Error('Function not implemented.');
-}
+export default Login;

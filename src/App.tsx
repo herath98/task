@@ -1,15 +1,14 @@
-// src/App.tsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
 import Login from './components/LoginForm';
+import HomePage from './pages/HomePage';
 
 const App: React.FC = () => {
   return (
     <Router>
       <Routes>
+        <Route path="/home" element={<HomePage />} />
         <Route path="/" element={<Login />} />
-        <Route path="/properties" element={<HomePage />} />
       </Routes>
     </Router>
   );
